@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -- Base type required empty definition
 CREATE TYPE decibel;
 
--- C functions for converting between decibels and pascals
+-- C functions for converting between dB and pascals
 CREATE FUNCTION decibelpascal(float8)  RETURNS float8 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT;
 CREATE FUNCTION pascaldecibel(float8)  RETURNS float8 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT;
 CREATE FUNCTION       pascals(decibel) RETURNS float8 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT;
@@ -33,66 +33,71 @@ CREATE FUNCTION decibel_in(cstring)  RETURNS decibel AS 'MODULE_PATHNAME' LANGUA
 CREATE FUNCTION decibel_out(decibel) RETURNS cstring AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT;
 
 -- Actual definition of the decibel type
-CREATE TYPE decibel ( INPUT = decibel_in, OUTPUT = decibel_out, LIKE = pg_catalog.float8 );
+CREATE TYPE dB ( INPUT = decibel_in, OUTPUT = decibel_out, LIKE = pg_catalog.float8 );
 
 -- Functions used for the casts. All these just pass through the text representation to convert
-CREATE OR REPLACE FUNCTION decibel(float8)  RETURNS decibel AS 'SELECT $1::text::decibel' LANGUAGE SQL IMMUTABLE STRICT COST 1;
-CREATE OR REPLACE FUNCTION decibel(float4)  RETURNS decibel AS 'SELECT $1::text::decibel' LANGUAGE SQL IMMUTABLE STRICT COST 1;
-CREATE OR REPLACE FUNCTION decibel(int2)    RETURNS decibel AS 'SELECT $1::text::decibel' LANGUAGE SQL IMMUTABLE STRICT COST 1;
-CREATE OR REPLACE FUNCTION decibel(int4)    RETURNS decibel AS 'SELECT $1::text::decibel' LANGUAGE SQL IMMUTABLE STRICT COST 1;
-CREATE OR REPLACE FUNCTION decibel(int8)    RETURNS decibel AS 'SELECT $1::text::decibel' LANGUAGE SQL IMMUTABLE STRICT COST 1;
-CREATE OR REPLACE FUNCTION decibel(numeric) RETURNS decibel AS 'SELECT $1::text::decibel' LANGUAGE SQL IMMUTABLE STRICT COST 1;
-CREATE OR REPLACE FUNCTION float8(decibel)  RETURNS float8  AS 'SELECT $1::text::float8'  LANGUAGE SQL IMMUTABLE STRICT COST 1;
-CREATE OR REPLACE FUNCTION num(decibel)     RETURNS numeric AS 'SELECT $1::text::numeric' LANGUAGE SQL IMMUTABLE STRICT COST 1;
+CREATE OR REPLACE FUNCTION decibel(float8)  RETURNS dB AS 'SELECT $1::text::dB' LANGUAGE SQL IMMUTABLE STRICT COST 1;
+CREATE OR REPLACE FUNCTION decibel(float4)  RETURNS dB AS 'SELECT $1::text::dB' LANGUAGE SQL IMMUTABLE STRICT COST 1;
+CREATE OR REPLACE FUNCTION decibel(int2)    RETURNS dB AS 'SELECT $1::text::dB' LANGUAGE SQL IMMUTABLE STRICT COST 1;
+CREATE OR REPLACE FUNCTION decibel(int4)    RETURNS dB AS 'SELECT $1::text::dB' LANGUAGE SQL IMMUTABLE STRICT COST 1;
+CREATE OR REPLACE FUNCTION decibel(int8)    RETURNS dB AS 'SELECT $1::text::dB' LANGUAGE SQL IMMUTABLE STRICT COST 1;
+CREATE OR REPLACE FUNCTION decibel(numeric) RETURNS dB AS 'SELECT $1::text::dB' LANGUAGE SQL IMMUTABLE STRICT COST 1;
+CREATE OR REPLACE FUNCTION float8(dB)  RETURNS float8  AS 'SELECT $1::text::float8'  LANGUAGE SQL IMMUTABLE STRICT COST 1;
+CREATE OR REPLACE FUNCTION num(dB)     RETURNS numeric AS 'SELECT $1::text::numeric' LANGUAGE SQL IMMUTABLE STRICT COST 1;
 
 -- Casts
-CREATE CAST (float8 AS decibel)  WITH FUNCTION decibel(float8)  AS IMPLICIT;
-CREATE CAST (float4 AS decibel)  WITH FUNCTION decibel(float4)  AS IMPLICIT;
-CREATE CAST (int2 AS decibel)    WITH FUNCTION decibel(int2)    AS IMPLICIT;
-CREATE CAST (int4 AS decibel)    WITH FUNCTION decibel(int4)    AS IMPLICIT;
-CREATE CAST (int8 AS decibel)    WITH FUNCTION decibel(int8)    AS IMPLICIT;
-CREATE CAST (numeric AS decibel) WITH FUNCTION decibel(numeric) AS IMPLICIT;
-CREATE CAST (decibel AS numeric) WITH FUNCTION num(decibel)     AS IMPLICIT;
-CREATE CAST (decibel AS float8)  WITH FUNCTION float8(decibel)  AS IMPLICIT;
+CREATE CAST (float8 AS dB)  WITH FUNCTION decibel(float8)  AS IMPLICIT;
+CREATE CAST (float4 AS dB)  WITH FUNCTION decibel(float4)  AS IMPLICIT;
+CREATE CAST (int2 AS dB)    WITH FUNCTION decibel(int2)    AS IMPLICIT;
+CREATE CAST (int4 AS dB)    WITH FUNCTION decibel(int4)    AS IMPLICIT;
+CREATE CAST (int8 AS dB)    WITH FUNCTION decibel(int8)    AS IMPLICIT;
+CREATE CAST (numeric AS dB) WITH FUNCTION decibel(numeric) AS IMPLICIT;
+CREATE CAST (dB AS numeric) WITH FUNCTION num(dB)     AS IMPLICIT;
+CREATE CAST (dB AS float8)  WITH FUNCTION float8(dB)  AS IMPLICIT;
 
 
 -- Functions used to back the operators
-CREATE FUNCTION decibel_sum(decibel,decibel) RETURNS decibel AS 'float8pl'  LANGUAGE INTERNAL IMMUTABLE STRICT;
-CREATE FUNCTION decibel_mi(decibel,decibel)  RETURNS decibel AS 'float8mi'  LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_sum(dB,dB) RETURNS dB AS 'float8pl'  LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_mi(dB,dB)  RETURNS dB AS 'float8mi'  LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_mul(dB,dB) RETURNS dB AS 'float8mul' LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_div(dB,dB) RETURNS dB AS 'float8div' LANGUAGE INTERNAL IMMUTABLE STRICT;
 
-CREATE FUNCTION decibel_div(decibel,float8)  RETURNS decibel AS 'float8div' LANGUAGE INTERNAL IMMUTABLE STRICT;
-CREATE FUNCTION decibel_mul(decibel,float8)  RETURNS decibel AS 'float8mul' LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_sum(dB,float8) RETURNS dB AS 'float8pl' LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_mi(dB,float8) RETURNS dB AS 'float8mi' LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_div(dB,float8)  RETURNS dB AS 'float8div' LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_mul(dB,float8)  RETURNS dB AS 'float8mul' LANGUAGE INTERNAL IMMUTABLE STRICT;
 
-CREATE FUNCTION decibel_mi(decibel,float8)   RETURNS decibel AS 'SELECT ($1::text::float8 - $2)::decibel'  LANGUAGE SQL IMMUTABLE STRICT;
-CREATE FUNCTION decibel_sum(decibel,float8)  RETURNS decibel AS 'SELECT ($1::text::float8 + $2)::decibel'  LANGUAGE SQL IMMUTABLE STRICT;
+--CREATE FUNCTION decibel_mi(decibel,float8)   RETURNS decibel AS 'SELECT ($1::text::float8 - $2)::decibel'  LANGUAGE SQL IMMUTABLE STRICT;
+--CREATE FUNCTION decibel_sum(decibel,float8)  RETURNS decibel AS 'SELECT ($1::text::float8 + $2)::decibel'  LANGUAGE SQL IMMUTABLE STRICT;
 
-CREATE FUNCTION decibel_eq(decibel,decibel) RETURNS boolean AS 'float8eq' LANGUAGE INTERNAL IMMUTABLE STRICT;
-CREATE FUNCTION decibel_ge(decibel,decibel) RETURNS boolean AS 'float8ge' LANGUAGE INTERNAL IMMUTABLE STRICT;
-CREATE FUNCTION decibel_gt(decibel,decibel) RETURNS boolean AS 'float8gt' LANGUAGE INTERNAL IMMUTABLE STRICT;
-CREATE FUNCTION decibel_le(decibel,decibel) RETURNS boolean AS 'float8le' LANGUAGE INTERNAL IMMUTABLE STRICT;
-CREATE FUNCTION decibel_lt(decibel,decibel) RETURNS boolean AS 'float8lt' LANGUAGE INTERNAL IMMUTABLE STRICT;
-CREATE FUNCTION decibel_ne(decibel,decibel) RETURNS boolean AS 'float8ne' LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_eq(dB,dB) RETURNS boolean AS 'float8eq' LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_ge(dB,dB) RETURNS boolean AS 'float8ge' LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_gt(dB,dB) RETURNS boolean AS 'float8gt' LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_le(dB,dB) RETURNS boolean AS 'float8le' LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_lt(dB,dB) RETURNS boolean AS 'float8lt' LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE OR REPLACE FUNCTION decibel_ne(dB,dB) RETURNS boolean AS 'float8ne' LANGUAGE INTERNAL IMMUTABLE STRICT;
 
+-- Mathmatical Operator definitions
+CREATE OPERATOR +  ( PROCEDURE = decibel_sum, LEFTARG=dB, RIGHTARG=dB );
+CREATE OPERATOR +  ( PROCEDURE = decibel_sum, LEFTARG=dB, RIGHTARG=float8  ); 
+CREATE OPERATOR /  ( PROCEDURE = decibel_div, LEFTARG=dB, RIGHTARG=dB  );
+CREATE OPERATOR /  ( PROCEDURE = decibel_div, LEFTARG=dB, RIGHTARG=float8  );
+CREATE OPERATOR *  ( PROCEDURE = decibel_mul, LEFTARG=dB, RIGHTARG=dB  );
+CREATE OPERATOR *  ( PROCEDURE = decibel_mul, LEFTARG=dB, RIGHTARG=float8  );
+CREATE OPERATOR -  ( PROCEDURE = decibel_mi,  LEFTARG=dB, RIGHTARG=dB );
+CREATE OPERATOR -  ( PROCEDURE = decibel_mi,  LEFTARG=dB, RIGHTARG=float8  ); 
 
-
--- Operator definitions
-CREATE OPERATOR +  ( PROCEDURE = decibel_sum, LEFTARG=decibel, RIGHTARG=decibel );
-CREATE OPERATOR +  ( PROCEDURE = decibel_sum, LEFTARG=decibel, RIGHTARG=float8  ); -- used in case of 65::decibel + 10.0 = 75 decibels
-CREATE OPERATOR /  ( PROCEDURE = decibel_div, LEFTARG=decibel, RIGHTARG=float8  );
-CREATE OPERATOR *  ( PROCEDURE = decibel_mul, LEFTARG=decibel, RIGHTARG=float8  );
-CREATE OPERATOR -  ( PROCEDURE = decibel_mi,  LEFTARG=decibel, RIGHTARG=decibel );
-CREATE OPERATOR -  ( PROCEDURE = decibel_mi,  LEFTARG=decibel, RIGHTARG=float8  ); -- used in case of 65::decibel - 10.0 = 55 decibels
-CREATE OPERATOR =  ( PROCEDURE = decibel_eq,  LEFTARG=decibel, RIGHTARG=decibel );
-CREATE OPERATOR <  ( PROCEDURE = decibel_lt,  LEFTARG=decibel, RIGHTARG=decibel );
-CREATE OPERATOR <= ( PROCEDURE = decibel_le,  LEFTARG=decibel, RIGHTARG=decibel );
-CREATE OPERATOR >  ( PROCEDURE = decibel_gt,  LEFTARG=decibel, RIGHTARG=decibel );
-CREATE OPERATOR >= ( PROCEDURE = decibel_ge,  LEFTARG=decibel, RIGHTARG=decibel );
-CREATE OPERATOR != ( PROCEDURE = decibel_ne,  LEFTARG=decibel, RIGHTARG=decibel );
-
+-- Comparative Operator definitions
+CREATE OPERATOR =  ( PROCEDURE = decibel_eq,  LEFTARG=dB, RIGHTARG=dB );
+CREATE OPERATOR <  ( PROCEDURE = decibel_lt,  LEFTARG=dB, RIGHTARG=dB );
+CREATE OPERATOR <= ( PROCEDURE = decibel_le,  LEFTARG=dB, RIGHTARG=dB );
+CREATE OPERATOR >  ( PROCEDURE = decibel_gt,  LEFTARG=dB, RIGHTARG=dB );
+CREATE OPERATOR >= ( PROCEDURE = decibel_ge,  LEFTARG=dB, RIGHTARG=dB );
+CREATE OPERATOR != ( PROCEDURE = decibel_ne,  LEFTARG=dB, RIGHTARG=dB );
 
 -- Functions used for min/max aggregates
-CREATE FUNCTION decibel_smaller(decibel,decibel) RETURNS decibel AS 'float8smaller' LANGUAGE INTERNAL IMMUTABLE STRICT;
-CREATE FUNCTION decibel_larger(decibel,decibel)  RETURNS decibel AS 'float8larger'  LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE FUNCTION decibel_smaller(dB,dB) RETURNS decibel AS 'float8smaller' LANGUAGE INTERNAL IMMUTABLE STRICT;
+CREATE FUNCTION decibel_larger(dB,dB)  RETURNS decibel AS 'float8larger'  LANGUAGE INTERNAL IMMUTABLE STRICT;
 
 -- Functiond used for avg aggregate
 CREATE FUNCTION decibel_accum(float8[],decibel) RETURNS float8[] AS $$
@@ -104,8 +109,8 @@ CREATE FUNCTION decibel_avg(float8[]) RETURNS decibel AS $$
 $$ LANGUAGE SQL IMMUTABLE STRICT;
 
 -- Aggregate Functions
-CREATE AGGREGATE sum(decibel) ( sfunc = decibel_sum, stype = decibel );
-CREATE AGGREGATE avg(decibel) ( sfunc = decibel_accum, stype = float8[], finalfunc=decibel_avg, initcond='{0,0,0}' );
-CREATE AGGREGATE max(decibel) ( sfunc = decibel_larger,  stype=decibel );
-CREATE AGGREGATE min(decibel) ( sfunc = decibel_smaller, stype=decibel );
+CREATE AGGREGATE sum(dB) ( sfunc = decibel_sum, stype = dB );
+CREATE AGGREGATE avg(dB) ( sfunc = decibel_accum, stype = float8[], finalfunc=decibel_avg, initcond='{0,0,0}' );
+CREATE AGGREGATE max(dB) ( sfunc = decibel_larger,  stype=dB );
+CREATE AGGREGATE min(dB) ( sfunc = decibel_smaller, stype=dB );
 --*/
