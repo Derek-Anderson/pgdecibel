@@ -33,8 +33,8 @@ typedef float8 decibel_t;
 #define PG_GETARG_DECIBEL(n) DatumGetDecibel(PG_GETARG_DATUM(n))
 #define PG_RETURN_DECIBEL(x) return DecibelGetDatum(x)
 
-Datum decibelpascal(PG_FUNCTION_ARGS);
-Datum pascaldecibel(PG_FUNCTION_ARGS);
+Datum decibel_to_pascal(PG_FUNCTION_ARGS);
+Datum pascal_to_decibel(PG_FUNCTION_ARGS);
 Datum pascals(PG_FUNCTION_ARGS);
 Datum decibel_in(PG_FUNCTION_ARGS);
 Datum decibel_out(PG_FUNCTION_ARGS);
@@ -43,19 +43,19 @@ Datum decibel_sum(PG_FUNCTION_ARGS);
 
 /* by value */
 
-PG_FUNCTION_INFO_V1(decibelpascal);
+PG_FUNCTION_INFO_V1(decibel_to_pascal);
 
 Datum
-decibelpascal(PG_FUNCTION_ARGS)
+decibel_to_pascal(PG_FUNCTION_ARGS)
 {
     float8   arg = PG_GETARG_FLOAT8(0);
     PG_RETURN_FLOAT8( pow( 10, arg / 10.0 ));
 }
 
-PG_FUNCTION_INFO_V1(pascaldecibel);
+PG_FUNCTION_INFO_V1(pascal_to_decibel);
 
 Datum
-pascaldecibel(PG_FUNCTION_ARGS)
+pascal_to_decibel(PG_FUNCTION_ARGS)
 {
     float8   arg = PG_GETARG_FLOAT8(0);
     PG_RETURN_FLOAT8( 10 * log10(arg) );
